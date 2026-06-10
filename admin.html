@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dzis Admin Panel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Fira+GO:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #080b14;
+            --surface: rgba(17, 24, 39, 0.92);
+            --surface-soft: rgba(17, 24, 39, 0.72);
+            --border: rgba(255, 255, 255, 0.08);
+            --text-main: #eef1f8;
+            --text-muted: rgba(238, 241, 248, 0.7);
+            --accent: #67d5ff;
+            --accent-strong: #8b5cf6;
+            --radius: 18px;
+            --shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
+            --transition: all 0.25s ease;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            min-height: 100vh;
+            font-family: 'Fira GO', 'Outfit', sans-serif;
+            background: radial-gradient(circle at top, rgba(103, 213, 255, 0.1), transparent 18%),
+                radial-gradient(circle at 20% 18%, rgba(139, 92, 246, 0.08), transparent 20%),
+                var(--bg);
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(160deg, rgba(8, 11, 20, 0.88), rgba(11, 15, 31, 0.96));
+            pointer-events: none;
+            z-index: -1;
+        }
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem clamp(1rem, 4vw, 2rem);
+            position: sticky;
+            top: 0;
+            background: rgba(7, 11, 20, 0.9);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(14px);
+            z-index: 10;
+        }
+        .logo-panel {
+            font-size: clamp(1.5rem, 2.5vw, 2rem);
+            font-weight: 800;
+            letter-spacing: 0.06em;
+        }
+        .logo-panel span {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-left: 0.8rem;
+        }
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.9rem 1.25rem;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .btn-back:hover { transform: translateY(-1px); background: rgba(255, 255, 255, 0.1); }
+        .page-wrap { max-width: min(1100px, calc(100% - 2rem)); margin: 0 auto; padding: 2rem 0 4rem; }
+        h1 { font-size: clamp(2rem, 3vw, 2.6rem); margin-bottom: 0.75rem; }
+        p.subtitle { color: var(--text-muted); margin-bottom: 2rem; }
+        .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.75rem; }
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.7rem; }
+        .card h2 { font-size: 1.2rem; margin-bottom: 1rem; }
+        .table-wrap { width: 100%; overflow-x: auto; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.08); background: rgba(7, 11, 20, 0.92); }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem; }
+        th, td { padding: 1rem 1.1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+        th { font-size: 0.78rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em; }
+        td { color: var(--text-main); }
+        tr:hover { background: rgba(255, 255, 255, 0.04); }
+        .actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+        .btn-action { border: 1px solid rgba(255, 255, 255, 0.12); background: rgba(255, 255, 255, 0.05); color: var(--text-main); border-radius: 999px; padding: 0.75rem 1rem; cursor: pointer; transition: var(--transition); }
+        .btn-delete { color: #ff8b8b; border-color: rgba(255, 77, 77, 0.25); }
+        .btn-ignore { color: var(--accent); }
+        .btn-action:hover { transform: translateY(-1px); background: rgba(255, 255, 255, 0.1); }
+        .post-thumb { margin-bottom: 0.85rem; }
+        .post-thumb img { display: block; width: 100%; max-width: 160px; height: auto; border-radius: 14px; border: 1px solid rgba(255,255,255,0.12); object-fit: cover; }
+        .post-meta { display: grid; gap: 0.55rem; }
+        .post-label { color: var(--text-muted); font-size: 0.87rem; }
+        .empty { color: var(--text-muted); padding: 1rem; }
+        .loading { color: var(--accent); }
+        @media (max-width: 820px) {
+            .grid { grid-template-columns: 1fr; }
+            .table-wrap { overflow-x: visible; }
+            table, thead, tbody, tr, th, td { display: block; }
+            th { display: none; }
+            tr { margin-bottom: 1rem; border-radius: 16px; padding: 1rem; border: 1px solid rgba(255, 255, 255, 0.08); }
+            td { display: grid; grid-template-columns: 1fr; padding: 0.65rem 0; border-bottom: none; }
+            td::before { content: attr(data-label); display: block; color: var(--text-muted); font-size: 0.78rem; margin-bottom: 0.35rem; }
+            td:last-child { padding-bottom: 0; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo-panel">Dzis <span>Admin</span></div>
+        <button class="btn-back" onclick="location.href='index.html'"><i class="fa-solid fa-arrow-left"></i> პლატფორმაზე დაბრუნება</button>
+    </nav>
+
+    <main class="page-wrap">
+        <h1>ადმინისტრაცია</h1>
+        <p class="subtitle">მართე რეპორტები და მომხმარებლები მარტივად. ეს გვერდი ასაქმებს მხოლოდ ადმინისტრატორის ავტორიზებული მომხმარებლების მისაღწევად.</p>
+
+        <div class="grid">
+            <section class="card">
+                <h2>პოსტის რეპორტები</h2>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ავტორი</th>
+                                <th>მიზეზი</th>
+                                <th>მოქმედება</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reports-table">
+                            <tr><td colspan="3" class="empty">ჩატვირთვა...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="card">
+                <h2>პოსტების მართვა</h2>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ავტორი</th>
+                                <th>ტექსტი</th>
+                                <th>კომენტ.</th>
+                                <th>მოქმედება</th>
+                            </tr>
+                        </thead>
+                        <tbody id="posts-table">
+                            <tr><td colspan="4" class="empty">ჩატვირთვა...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="card">
+                <h2>კომენტარების მართვა</h2>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>პოსტი</th>
+                                <th>კომენტარი</th>
+                                <th>ავტორი</th>
+                                <th>მოქმედება</th>
+                            </tr>
+                        </thead>
+                        <tbody id="comments-table">
+                            <tr><td colspan="4" class="empty">ჩატვირთვა...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="card">
+                <h2>მომხმარებელთა база</h2>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>მომხმარებელი</th>
+                                <th>ელ-ფოსტა</th>
+                                <th>როლი</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table">
+                            <tr><td colspan="3" class="empty">ჩატვირთვა...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+        import { getFirestore, collection, doc, getDoc, onSnapshot, deleteDoc, updateDoc, arrayRemove } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAGgAZ7o9p0qUHdeU4CK-OXn4QaB_XD0ow",
+            authDomain: "chillstep-8614c.firebaseapp.com",
+            databaseURL: "https://chillstep-8614c-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "chillstep-8614c",
+            storageBucket: "chillstep-8614c.firebasestorage.app",
+            messagingSenderId: "209607140121",
+            appId: "1:209607140121:web:f46b7e95eb4cd6e01d5b88",
+            measurementId: "G-204V1J70S6"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const reportsTable = document.getElementById('reports-table');
+        const postsTable = document.getElementById('posts-table');
+        const commentsTable = document.getElementById('comments-table');
+        const usersTable = document.getElementById('users-table');
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                location.href = 'index.html';
+                return;
+            }
+
+            const userDoc = await getDoc(doc(db, 'users', user.uid));
+            const userData = userDoc.exists() ? userDoc.data() : null;
+            if (!userData || userData.role !== 'admin') {
+                location.href = 'index.html';
+                return;
+            }
+
+            initAdminPanel();
+        });
+
+        function initAdminPanel() {
+            onSnapshot(collection(db, 'reports'), (snapshot) => {
+                reportsTable.innerHTML = '';
+                if (snapshot.empty) {
+                    reportsTable.innerHTML = '<tr><td colspan="3" class="empty">რეპორტები არ არის.</td></tr>';
+                    return;
+                }
+                snapshot.forEach((docSnap) => {
+                    const report = docSnap.data();
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td data-label="ავტორი">@${report.reportedBy || 'უცნობი'}</td>
+                        <td data-label="მიზეზი">${report.reason || 'თხრობის გარეშე'}</td>
+                        <td data-label="მოქმედება">
+                            <div class="actions">
+                                <button class="btn-action btn-delete" data-report-id="${docSnap.id}" data-post-id="${report.postId || ''}">წაშლა</button>
+                                <button class="btn-action btn-ignore" data-report-id="${docSnap.id}">იგნორი</button>
+                            </div>
+                        </td>
+                    `;
+                    reportsTable.appendChild(tr);
+                });
+                document.querySelectorAll('.btn-delete').forEach((button) => button.addEventListener('click', handleDeleteReport));
+                document.querySelectorAll('.btn-ignore').forEach((button) => button.addEventListener('click', handleIgnoreReport));
+            });
+
+            onSnapshot(collection(db, 'users'), (snapshot) => {
+                usersTable.innerHTML = '';
+                if (snapshot.empty) {
+                    usersTable.innerHTML = '<tr><td colspan="3" class="empty">მომხმარებელი არ არის.</td></tr>';
+                    return;
+                }
+                snapshot.forEach((docSnap) => {
+                    const user = docSnap.data();
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td data-label="მომხმარებელი">@${user.username || 'მომხმარებელი'}</td>
+                        <td data-label="ელ-ფოსტა">${user.email || 'უცნობი'}</td>
+                        <td data-label="როლი">${user.role || 'user'}</td>
+                    `;
+                    usersTable.appendChild(tr);
+                });
+            });
+
+            onSnapshot(collection(db, 'posts'), (snapshot) => {
+                postsTable.innerHTML = '';
+                commentsTable.innerHTML = '';
+                let commentCount = 0;
+
+                if (snapshot.empty) {
+                    postsTable.innerHTML = '<tr><td colspan="4" class="empty">პოსტები არ არის.</td></tr>';
+                    commentsTable.innerHTML = '<tr><td colspan="4" class="empty">კომენტარები არ არის.</td></tr>';
+                    return;
+                }
+
+                snapshot.forEach((docSnap) => {
+                    const post = docSnap.data();
+                    const postId = docSnap.id;
+                    const excerpt = (post.text || '').length > 55 ? `${post.text.slice(0, 52)}...` : post.text || '---';
+
+                    const postRow = document.createElement('tr');
+                    postRow.innerHTML = `
+                        <td data-label="ავტორი">@${post.authorName || 'უცნობი'}</td>
+                        <td data-label="ტექსტი">
+                            <div class="post-meta">
+                                ${post.image ? `<div class="post-thumb"><img src="${post.image}" alt="პოსტის ფოტო"></div>` : ''}
+                                <div>${excerpt}</div>
+                                ${post.mood ? `<div class="post-label">მუდრო: ${post.mood}</div>` : ''}
+                            </div>
+                        </td>
+                        <td data-label="კომენტარები">${(post.comments || []).length}</td>
+                        <td data-label="მოქმედება">
+                            <div class="actions">
+                                <button class="btn-action btn-delete-post" data-post-id="${postId}">წაშლა</button>
+                            </div>
+                        </td>
+                    `;
+                    postsTable.appendChild(postRow);
+
+                    const comments = Array.isArray(post.comments) ? post.comments : [];
+                    comments.forEach((comment) => {
+                        commentCount += 1;
+                        const commentRow = document.createElement('tr');
+                        commentRow.innerHTML = `
+                            <td data-label="პოსტი">@${post.authorName || 'უცნობი'}</td>
+                            <td data-label="კომენტარი">${comment.text?.slice(0, 60) || '---'}</td>
+                            <td data-label="ავტორი">@${comment.author || 'უცნობი'}</td>
+                            <td data-label="მოქმედება">
+                                <button class="btn-action btn-delete-comment" data-post-id="${postId}"
+                                    data-comment-author="${encodeURIComponent(comment.author || '')}"
+                                    data-comment-user-id="${encodeURIComponent(comment.userId || '')}"
+                                    data-comment-text="${encodeURIComponent(comment.text || '')}"
+                                    data-comment-created-at="${encodeURIComponent(comment.createdAt || '')}">წაშლა</button>
+                            </td>
+                        `;
+                        commentsTable.appendChild(commentRow);
+                    });
+                });
+
+                if (commentCount === 0) {
+                    commentsTable.innerHTML = '<tr><td colspan="4" class="empty">კომენტარები არ არის.</td></tr>';
+                }
+
+                document.querySelectorAll('.btn-delete-post').forEach((button) => button.addEventListener('click', handleDeletePost));
+                document.querySelectorAll('.btn-delete-comment').forEach((button) => button.addEventListener('click', handleDeleteComment));
+            });
+        }
+
+        async function handleDeletePost(event) {
+            const button = event.currentTarget;
+            const postId = button.dataset.postId;
+            if (!postId) return;
+            if (!confirm('დარწმუნებული ხარ, რომ ეს პოსტი წაიშალოს?')) return;
+            try {
+                await deleteDoc(doc(db, 'posts', postId));
+            } catch (error) {
+                console.error('Delete post failed', error);
+                alert('პოსტის წაშლა ვერ მოხერხდა.');
+            }
+        }
+
+        async function handleDeleteComment(event) {
+            const button = event.currentTarget;
+            const postId = button.dataset.postId;
+            const author = decodeURIComponent(button.dataset.commentAuthor || '');
+            const userId = decodeURIComponent(button.dataset.commentUserId || '');
+            const text = decodeURIComponent(button.dataset.commentText || '');
+            const createdAt = decodeURIComponent(button.dataset.commentCreatedAt || '');
+            if (!postId || !createdAt) return;
+            if (!confirm('დარწმუნებული ხარ, რომ ეს კომენტარი წაიშალოს?')) return;
+            try {
+                const comment = {
+                    author,
+                    userId,
+                    text,
+                    createdAt
+                };
+                await updateDoc(doc(db, 'posts', postId), {
+                    comments: arrayRemove(comment)
+                });
+            } catch (error) {
+                console.error('Delete comment failed', error);
+                alert('კომენტარის წაშლა ვერ შესრულდა.');
+            }
+        }
+
+        async function handleDeleteReport(event) {
+            const button = event.currentTarget;
+            const reportId = button.dataset.reportId;
+            const postId = button.dataset.postId;
+            if (!reportId) return;
+            if (!confirm('გსურთ ეს რეპორტი და დაკავშირებული პოსტი წაშალოთ?')) return;
+
+            try {
+                if (postId) await deleteDoc(doc(db, 'posts', postId));
+                await deleteDoc(doc(db, 'reports', reportId));
+            } catch (error) {
+                console.error('Delete failed', error);
+                alert('წაშლა ვერ შესრულდა. სცადეთ თავიდან.');
+            }
+        }
+
+        async function handleIgnoreReport(event) {
+            const button = event.currentTarget;
+            const reportId = button.dataset.reportId;
+            if (!reportId) return;
+            try {
+                await deleteDoc(doc(db, 'reports', reportId));
+            } catch (error) {
+                console.error('Ignore failed', error);
+                alert('რეპორტის იგნორირება ვერ მოხერხდა.');
+            }
+        }
+    </script>
+</body>
+</html>

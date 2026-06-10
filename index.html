@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vibe</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Fira+GO:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <nav>
+        <div class="logo">Vibe</div>
+        <div class="nav-links">
+            <button id="nav-feed" class="nav-btn active hidden"><i class="fa-solid fa-layer-group"></i> <span>ნაკადი</span></button>
+            <button id="nav-logout" class="nav-btn hidden"><i class="fa-solid fa-power-off"></i> <span>გასვლა</span></button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div id="auth-screen">
+            <h2 id="auth-title">Vibe</h2>
+            <div class="input-group" id="username-group">
+                <label>სახელი</label>
+                <input type="text" id="auth-username" placeholder="სახელი">
+            </div>
+            <div class="input-group">
+                <label>ელ-ფოსტა</label>
+                <input type="email" id="auth-email" placeholder="example@mail.com">
+            </div>
+            <div class="input-group">
+                <label>პაროლი</label>
+                <input type="password" id="auth-password" placeholder="••••••••">
+            </div>
+            <button class="btn-solid" id="btn-auth-submit">შესვლა</button>
+            <div class="toggle-auth" id="toggle-auth-mode">არ გაქვს ანგარიში? <span>შექმენი ახლა</span></div>
+        </div>
+
+        <div id="feed-screen" class="hidden feed-layout">
+            <div class="create-post">
+                <textarea id="post-text" placeholder="გააზიარე შენი ფიქრები..."></textarea>
+                <div class="post-extras">
+                    <div class="mood-group">
+                        <span>განწყობა:</span>
+                        <div id="mood-buttons" class="mood-buttons">
+                            <button type="button" class="mood-pill active" data-mood="✨ სასიამოვნო">✨ სასიამოვნო</button>
+                            <button type="button" class="mood-pill" data-mood="🔥 ენერგიული">🔥 ენერგიული</button>
+                            <button type="button" class="mood-pill" data-mood="😐 მოწყენილი">😐 მოწყენილი</button>
+                            <button type="button" class="mood-pill" data-mood="😁 ბედნიერი">😁 ბედნიერი</button>
+                            <button type="button" class="mood-pill" data-mood="💬 გულწრფელი">💬 გულწრფელი</button>
+                        </div>
+                    </div>
+                    <button type="button" id="btn-random-prompt" class="btn-outline">შემეცი იდეა</button>
+                </div>
+                <div id="prompt-note" class="prompt-note">პრეცეპტი: დაწერე მოკლე ისტორია ან ინსაიტი.</div>
+                <div id="camera-container" class="camera-box hidden">
+                    <video id="camera-video" autoplay playsinline></video>
+                    <div class="cam-controls">
+                        <button class="btn-solid" id="btn-capture" style="width:auto; padding: 0.5rem 1.5rem; border-radius: var(--radius-round);"><i class="fa-solid fa-camera"></i> გადაღება</button>
+                        <button class="btn-outline" id="btn-close-camera" style="background: rgba(0,0,0,0.5);">დახურვა</button>
+                    </div>
+                </div>
+
+                <div id="preview-container" class="hidden">
+                    <button class="del-preview" id="btn-clear-preview"><i class="fa-solid fa-xmark"></i></button>
+                    <img id="preview-img" src="">
+                </div><div class="post-actions">
+                    <div class="action-group">
+                        <button class="btn-outline" id="btn-open-camera"><i class="fa-solid fa-video"></i> კამერა</button>
+                    </div>
+                    <button class="btn-solid" id="btn-share-post" style="width:auto; padding: 0.5rem 1.5rem; border-radius: var(--radius-round);">გამოქვეყნება</button>
+                </div>
+            </div>
+
+            <div id="posts-container"></div>
+        </div>
+    </div>
+
+    <!-- Notification Modal System -->
+    <div id="modal-overlay" class="modal-overlay hidden"></div>
+    <div id="notification-container" class="notification-container"></div>
+    
+    <script type="module" src="script.js"></script>
+</body>
+</html>
